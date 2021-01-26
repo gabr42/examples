@@ -1,0 +1,12 @@
+
+Reader-writer lock/__history/
+
+*.~dsk
+
+*.local
+
+*.identcache
+
+*.dsk
+
+Reader-writer lock/Win32/Debug/

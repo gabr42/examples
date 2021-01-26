@@ -1,0 +1,111 @@
+object frmRWLockMain: TfrmRWLockMain
+  Left = 0
+  Top = 0
+  Caption = 'Form18'
+  ClientHeight = 480
+  ClientWidth = 640
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  DesignerMasterStyle = 0
+  object btnBenchmark: TButton
+    Position.X = 328.000000000000000000
+    Position.Y = 72.000000000000000000
+    Size.Width = 97.000000000000000000
+    Size.Height = 33.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 0
+    Text = 'Benchmark!'
+    OnClick = btnBenchmarkClick
+  end
+  object lblNumSub: TLabel
+    Position.X = 24.000000000000000000
+    Position.Y = 24.000000000000000000
+    Size.Width = 145.000000000000000000
+    Size.Height = 17.000000000000000000
+    Size.PlatformDefault = False
+    Text = 'Number of subscribers:'
+    TabOrder = 1
+  end
+  object inpNumSub: TEdit
+    Touch.InteractiveGestures = [LongTap, DoubleTap]
+    TabOrder = 2
+    Text = '20'
+    Position.X = 184.000000000000000000
+    Position.Y = 22.000000000000000000
+  end
+  object lblDuration: TLabel
+    Position.X = 24.000000000000000000
+    Position.Y = 88.000000000000000000
+    Size.Width = 161.000000000000000000
+    Size.Height = 17.000000000000000000
+    Size.PlatformDefault = False
+    Text = 'Benchmark duration (sec):'
+    TabOrder = 3
+  end
+  object inpDuration: TEdit
+    Touch.InteractiveGestures = [LongTap, DoubleTap]
+    TabOrder = 4
+    Text = '60'
+    Position.X = 184.000000000000000000
+    Position.Y = 86.000000000000000000
+  end
+  object lbLog: TListBox
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    Position.X = 24.000000000000000000
+    Position.Y = 128.000000000000000000
+    Size.Width = 585.000000000000000000
+    Size.Height = 337.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 6
+    DisableFocusEffect = True
+    DefaultItemStyles.ItemStyle = ''
+    DefaultItemStyles.GroupHeaderStyle = ''
+    DefaultItemStyles.GroupFooterStyle = ''
+    Viewport.Width = 581.000000000000000000
+    Viewport.Height = 333.000000000000000000
+  end
+  object lblLocking: TLabel
+    Position.X = 328.000000000000000000
+    Position.Y = 24.000000000000000000
+    Size.Width = 121.000000000000000000
+    Size.Height = 17.000000000000000000
+    Size.PlatformDefault = False
+    Text = 'Locking mechanism:'
+    TabOrder = 7
+  end
+  object cbxLockingScheme: TComboBox
+    Items.Strings = (
+      'none'
+      'TCriticalSection'
+      'TMonitor'
+      'TMREWSync'
+      'TLightweightMREW')
+    ItemIndex = 4
+    Position.X = 448.000000000000000000
+    Position.Y = 22.000000000000000000
+    Size.Width = 153.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 8
+  end
+  object lblNumPublishers: TLabel
+    Position.X = 24.000000000000000000
+    Position.Y = 56.000000000000000000
+    Text = 'Number of publishers:'
+    TabOrder = 9
+  end
+  object inpNumPub: TEdit
+    Touch.InteractiveGestures = [LongTap, DoubleTap]
+    TabOrder = 10
+    Text = '20'
+    Position.X = 184.000000000000000000
+    Position.Y = 54.000000000000000000
+  end
+  object Timer1: TTimer
+    Enabled = False
+    OnTimer = Timer1Timer
+    Left = 488
+    Top = 72
+  end
+end

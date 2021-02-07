@@ -105,7 +105,17 @@ object frmRWLockMain: TfrmRWLockMain
   object Timer1: TTimer
     Enabled = False
     OnTimer = Timer1Timer
-    Left = 488
-    Top = 72
+    Left = 568
+    Top = 136
+  end
+  object btnCopyToClipboard: TButton
+    Position.X = 456.000000000000000000
+    Position.Y = 72.000000000000000000
+    Size.Width = 129.000000000000000000
+    Size.Height = 33.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 12
+    Text = 'Copy to clipboard'
+    OnClick = btnCopyToClipboardClick
   end
 end

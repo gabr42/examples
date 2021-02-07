@@ -21,7 +21,9 @@ type
     cbxLockingScheme: TComboBox;
     lblNumPublishers: TLabel;
     inpNumPub: TEdit;
+    btnCopyToClipboard: TButton;
     procedure btnBenchmarkClick(Sender: TObject);
+    procedure btnCopyToClipboardClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
   private
     FMaxPubConcurrency: int64;
@@ -50,7 +52,8 @@ implementation
 
 uses
   GpConsole,
-  System.SyncObjs, System.Diagnostics;
+  System.SyncObjs, System.Diagnostics,
+  FMX.Clipboard, FMX.Platform;
 
 {$R *.fmx}
 
@@ -67,55 +70,58 @@ procedure TfrmRWLockMain.btnBenchmarkClick(Sender: TObject);
 
 begin
   FTestPool := TThreadPool.Create;
-  try
-    lbLog.Items.Add('Benchmarking ' + cbxLockingScheme.Items[cbxLockingScheme.ItemIndex]);
-    btnBenchmark.Enabled := false;
-    Application.ProcessMessages;
 
-    MeasureRawSpeed;
+  lbLog.Items.Add('Benchmarking ' + cbxLockingScheme.Items[cbxLockingScheme.ItemIndex]);
+  btnBenchmark.Enabled := false;
+  Application.ProcessMessages;
 
-    FStopBenchmark := false;
-    FNumSubscriptions := 0;
-    FNumNotifications := 0;
-    FMaxPubConcurrency := 0;
-    FPubConcurrency := 0;
+  MeasureRawSpeed;
 
-    PrimeThreadPool(inpNumPub.Text.ToInteger + inpNumSub.Text.ToInteger);
-    lbLog.Items.Add('Thread pool ready');
-    Application.ProcessMessages;
+  FStopBenchmark := false;
+  FNumSubscriptions := 0;
+  FNumNotifications := 0;
+  FMaxPubConcurrency := 0;
+  FPubConcurrency := 0;
 
-    FPubSub := TPubSub.Create(GetScheme);
-    FPubSub.OnStartNotify :=
-      procedure
-      var
-        numPub: integer;
-        maxPub: integer;
-      begin
-        numPub := TInterlocked.Increment(FPubConcurrency);
-        repeat
-          maxPub := TInterlocked.Read(FMaxPubConcurrency);
-        until (numPub <= maxPub)
-               or (TInterlocked.CompareExchange(FMaxPubConcurrency, numPub, maxPub) = maxPub);
-      end;
-    FPubSub.OnEndNotify :=
-      procedure
-      begin
-        TInterlocked.Decrement(FPubConcurrency);
-      end;
+  PrimeThreadPool(inpNumPub.Text.ToInteger + inpNumSub.Text.ToInteger);
 
-    SetLength(FPublishers, inpNumPub.Text.ToInteger);
-    SetLength(FPubNotifications, Length(FPublishers));
-    for var i := Low(FPublishers) to High(FPublishers) do
-      FPublishers[i] := TTask.Run(MakePublisher(i), FTestPool);
-    SetLength(FSubscribers, inpNumSub.Text.ToInteger);
-    for var i := Low(FSubscribers) to High(FSubscribers) do
-      FSubscribers[i] := TTask.Run(Subscriber, FTestPool);
+  FPubSub := TPubSub.Create(GetScheme);
+  FPubSub.OnStartNotify :=
+    procedure
+    var
+      numPub: integer;
+      maxPub: integer;
+    begin
+      numPub := TInterlocked.Increment(FPubConcurrency);
+      repeat
+        maxPub := TInterlocked.Read(FMaxPubConcurrency);
+      until (numPub <= maxPub)
+             or (TInterlocked.CompareExchange(FMaxPubConcurrency, numPub, maxPub) = maxPub);
+    end;
+  FPubSub.OnEndNotify :=
+    procedure
+    begin
+      TInterlocked.Decrement(FPubConcurrency);
+    end;
 
-    Timer1.Interval := 1000 * inpDuration.Text.ToInteger;
-    Timer1.Enabled := true;
-  finally
-    FreeAndNil(FTestPool);
-  end;
+  SetLength(FPublishers, inpNumPub.Text.ToInteger);
+  SetLength(FPubNotifications, Length(FPublishers));
+  for var i := Low(FPublishers) to High(FPublishers) do
+    FPublishers[i] := TTask.Run(MakePublisher(i), FTestPool);
+  SetLength(FSubscribers, inpNumSub.Text.ToInteger);
+  for var i := Low(FSubscribers) to High(FSubscribers) do
+    FSubscribers[i] := TTask.Run(Subscriber, FTestPool);
+
+  Timer1.Interval := 1000 * inpDuration.Text.ToInteger;
+  Timer1.Enabled := true;
+end;
+
+procedure TfrmRWLockMain.btnCopyToClipboardClick(Sender: TObject);
+var
+  Svc: IFMXClipboardService;
+begin
+  if TPlatformServices.Current.SupportsPlatformService(IFMXClipboardService, Svc) then
+    Svc.SetClipboard(lbLog.Items.Text);
 end;
 
 function TfrmRWLockMain.GetScheme: TPubSub.TLockingScheme;
@@ -292,6 +298,8 @@ begin
   lbLog.Items.Add('Notify calls per thread: ' + s);
   lbLog.Items.Add('Maximum level of Notify concurrency: ' + FMaxPubConcurrency.ToString);
   btnBenchmark.Enabled := true;
+
+  FreeAndNil(FTestPool);
 end;
 
 end.

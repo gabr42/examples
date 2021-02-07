@@ -5,8 +5,8 @@ interface
 uses
   System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants, System.Threading,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs,
-  FMX.Controls.Presentation, FMX.StdCtrls,
-  PublishSubscribe, FMX.Edit, FMX.Layouts, FMX.ListBox;
+  FMX.Controls.Presentation, FMX.StdCtrls, FMX.Edit, FMX.Layouts, FMX.ListBox,
+  PublishSubscribe;
 
 type
   TfrmRWLockMain = class(TForm)
@@ -29,14 +29,16 @@ type
     FNumNotifications: integer;
     FPubConcurrency: integer;
     FPublishers: TArray<ITask>;
+    FPubNotifications: TArray<integer>;
     FPubSub: TPubSub;
     FSubscribers: TArray<ITask>;
     FStopBenchmark: boolean;
+    FTestPool: TThreadPool;
   strict protected
     function GetScheme: TPubSub.TLockingScheme;
     procedure MeasureRawSpeed;
     procedure PrimeThreadPool(numThreads: integer);
-    procedure Publisher;
+    procedure Publisher(idx: integer);
     procedure Subscriber;
   public
   end;
@@ -47,54 +49,73 @@ var
 implementation
 
 uses
+  GpConsole,
   System.SyncObjs, System.Diagnostics;
 
 {$R *.fmx}
 
 procedure TfrmRWLockMain.btnBenchmarkClick(Sender: TObject);
+
+  function MakePublisher(idx: integer): TProc;
+  begin
+    Result :=
+      procedure
+      begin
+        Publisher(idx);
+      end;
+  end;
+
 begin
-  lbLog.Items.Add('Benchmarking ' + cbxLockingScheme.Items[cbxLockingScheme.ItemIndex]);
-  btnBenchmark.Enabled := false;
-  Application.ProcessMessages;
+  FTestPool := TThreadPool.Create;
+  try
+    lbLog.Items.Add('Benchmarking ' + cbxLockingScheme.Items[cbxLockingScheme.ItemIndex]);
+    btnBenchmark.Enabled := false;
+    Application.ProcessMessages;
 
-  MeasureRawSpeed;
+    MeasureRawSpeed;
 
-  FStopBenchmark := false;
-  FNumSubscriptions := 0;
-  FNumNotifications := 0;
-  FMaxPubConcurrency := 0;
-  FPubConcurrency := 0;
+    FStopBenchmark := false;
+    FNumSubscriptions := 0;
+    FNumNotifications := 0;
+    FMaxPubConcurrency := 0;
+    FPubConcurrency := 0;
 
-  PrimeThreadPool(inpNumPub.Text.ToInteger + inpNumSub.Text.ToInteger);
+    PrimeThreadPool(inpNumPub.Text.ToInteger + inpNumSub.Text.ToInteger);
+    lbLog.Items.Add('Thread pool ready');
+    Application.ProcessMessages;
 
-  FPubSub := TPubSub.Create(GetScheme);
-  FPubSub.OnStartNotify :=
-    procedure
-    var
-      numPub: integer;
-      maxPub: integer;
-    begin
-      numPub := TInterlocked.Increment(FPubConcurrency);
-      repeat
-        maxPub := TInterlocked.Read(FMaxPubConcurrency);
-      until (numPub <= maxPub)
-             or (TInterlocked.CompareExchange(FMaxPubConcurrency, numPub, maxPub) = maxPub);
-    end;
-  FPubSub.OnEndNotify :=
-    procedure
-    begin
-      TInterlocked.Decrement(FPubConcurrency);
-    end;
+    FPubSub := TPubSub.Create(GetScheme);
+    FPubSub.OnStartNotify :=
+      procedure
+      var
+        numPub: integer;
+        maxPub: integer;
+      begin
+        numPub := TInterlocked.Increment(FPubConcurrency);
+        repeat
+          maxPub := TInterlocked.Read(FMaxPubConcurrency);
+        until (numPub <= maxPub)
+               or (TInterlocked.CompareExchange(FMaxPubConcurrency, numPub, maxPub) = maxPub);
+      end;
+    FPubSub.OnEndNotify :=
+      procedure
+      begin
+        TInterlocked.Decrement(FPubConcurrency);
+      end;
 
-  SetLength(FPublishers, inpNumPub.Text.ToInteger);
-  for var i := Low(FPublishers) to High(FPublishers) do
-    FPublishers[i] := TTask.Run(Publisher);
-  SetLength(FSubscribers, inpNumSub.Text.ToInteger);
-  for var i := Low(FSubscribers) to High(FSubscribers) do
-    FSubscribers[i] := TTask.Run(Subscriber);
+    SetLength(FPublishers, inpNumPub.Text.ToInteger);
+    SetLength(FPubNotifications, Length(FPublishers));
+    for var i := Low(FPublishers) to High(FPublishers) do
+      FPublishers[i] := TTask.Run(MakePublisher(i), FTestPool);
+    SetLength(FSubscribers, inpNumSub.Text.ToInteger);
+    for var i := Low(FSubscribers) to High(FSubscribers) do
+      FSubscribers[i] := TTask.Run(Subscriber, FTestPool);
 
-  Timer1.Interval := 1000 * inpDuration.Text.ToInteger;
-  Timer1.Enabled := true;
+    Timer1.Interval := 1000 * inpDuration.Text.ToInteger;
+    Timer1.Enabled := true;
+  finally
+    FreeAndNil(FTestPool);
+  end;
 end;
 
 function TfrmRWLockMain.GetScheme: TPubSub.TLockingScheme;
@@ -182,6 +203,7 @@ begin
     lbLog.Items.Add('Read/write: ' + cntRead.ToString + '/sec')
   else
     lbLog.Items.Add('Read: ' + cntRead.ToString + '/sec, write: ' + cntWrite.ToString + '/sec');
+  Application.ProcessMessages;
 end;
 
 procedure TfrmRWLockMain.PrimeThreadPool(numThreads: integer);
@@ -189,8 +211,10 @@ var
   tasks: TArray<ITask>;
   numRunning: int64;
 begin
+  FTestPool.SetMaxWorkerThreads(numThreads+2);
+  FTestPool.SetMinWorkerThreads(numThreads);
+
   SetLength(tasks, numThreads);
-  TThreadPool.Default.SetMinWorkerThreads(numThreads);
 
   numRunning := 0;
   for var i := Low(tasks) to High(tasks) do
@@ -200,13 +224,14 @@ begin
         TInterlocked.Increment(numRunning);
         while TInterlocked.Read(numRunning) < Length(tasks) do
           Sleep(10);
-      end);
+      end,
+      FTestPool);
 
   for var i := Low(tasks) to High(tasks) do
     tasks[i].Wait();
 end;
 
-procedure TfrmRWLockMain.Publisher;
+procedure TfrmRWLockMain.Publisher(idx: integer);
 var
   id: integer;
 begin
@@ -217,6 +242,7 @@ begin
     FPubSub.Notify(id);
   end;
   AtomicIncrement(FNumNotifications, id);
+  FPubNotifications[idx] := id;
 end;
 
 procedure TfrmRWLockMain.Subscriber;
@@ -227,15 +253,13 @@ begin
   callback :=
     procedure (value: integer)
     begin
-      var a: extended := 0;
-      for var i := 1 to 10000 do
-        a := cos(a);
+      Sleep(50);
     end;
 
   numSub := 0;
   while not FStopBenchmark do begin
-    Sleep(10);
     FPubSub.Subscribe(callback);
+    Sleep(10);
     FPubSub.Unsubscribe(callback);
     Inc(numSub);
   end;
@@ -244,6 +268,9 @@ begin
 end;
 
 procedure TfrmRWLockMain.Timer1Timer(Sender: TObject);
+var
+  i: integer;
+  s: string;
 begin
   Timer1.Enabled := false;
   FStopBenchmark := true;
@@ -256,8 +283,13 @@ begin
   FSubscribers := nil;
   FreeAndNil(FPubSub);
 
+  s := '';
+  for i in FPubNotifications do
+    s := s + i.ToString + ' ';
+
   lbLog.Items.Add('Number of Subscribe/Unsubscribe calls: ' + FNumSubscriptions.ToString);
   lbLog.Items.Add('Number of Notify calls: ' + FNumNotifications.ToString);
+  lbLog.Items.Add('Notify calls per thread: ' + s);
   lbLog.Items.Add('Maximum level of Notify concurrency: ' + FMaxPubConcurrency.ToString);
   btnBenchmark.Enabled := true;
 end;

@@ -14,7 +14,7 @@ object frmRWLockMain: TfrmRWLockMain
     Size.Width = 97.000000000000000000
     Size.Height = 33.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 0
+    TabOrder = 4
     Text = 'Benchmark!'
     OnClick = btnBenchmarkClick
   end
@@ -25,11 +25,11 @@ object frmRWLockMain: TfrmRWLockMain
     Size.Height = 17.000000000000000000
     Size.PlatformDefault = False
     Text = 'Number of subscribers:'
-    TabOrder = 1
+    TabOrder = 6
   end
   object inpNumSub: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
-    TabOrder = 2
+    TabOrder = 0
     Text = '20'
     Position.X = 184.000000000000000000
     Position.Y = 22.000000000000000000
@@ -41,11 +41,11 @@ object frmRWLockMain: TfrmRWLockMain
     Size.Height = 17.000000000000000000
     Size.PlatformDefault = False
     Text = 'Benchmark duration (sec):'
-    TabOrder = 3
+    TabOrder = 7
   end
   object inpDuration: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
-    TabOrder = 4
+    TabOrder = 2
     Text = '60'
     Position.X = 184.000000000000000000
     Position.Y = 86.000000000000000000
@@ -57,7 +57,7 @@ object frmRWLockMain: TfrmRWLockMain
     Size.Width = 585.000000000000000000
     Size.Height = 337.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 6
+    TabOrder = 5
     DisableFocusEffect = True
     DefaultItemStyles.ItemStyle = ''
     DefaultItemStyles.GroupHeaderStyle = ''
@@ -72,7 +72,7 @@ object frmRWLockMain: TfrmRWLockMain
     Size.Height = 17.000000000000000000
     Size.PlatformDefault = False
     Text = 'Locking mechanism:'
-    TabOrder = 7
+    TabOrder = 9
   end
   object cbxLockingScheme: TComboBox
     Items.Strings = (
@@ -87,17 +87,17 @@ object frmRWLockMain: TfrmRWLockMain
     Size.Width = 153.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 8
+    TabOrder = 3
   end
   object lblNumPublishers: TLabel
     Position.X = 24.000000000000000000
     Position.Y = 56.000000000000000000
     Text = 'Number of publishers:'
-    TabOrder = 9
+    TabOrder = 10
   end
   object inpNumPub: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
-    TabOrder = 10
+    TabOrder = 1
     Text = '20'
     Position.X = 184.000000000000000000
     Position.Y = 54.000000000000000000

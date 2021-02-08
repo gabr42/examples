@@ -51,7 +51,6 @@ var
 implementation
 
 uses
-  GpConsole,
   System.SyncObjs, System.Diagnostics,
   FMX.Clipboard, FMX.Platform;
 

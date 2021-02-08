@@ -1,0 +1,72 @@
+Benchmarking TCriticalSection
+Read/write: 15335329/sec
+Number of Subscribe/Unsubscribe calls: 20
+Number of Notify calls: 481
+Notify calls per thread: 89 104 25 61 26 3 3 7 8 2 1 1 1 1 144 1 1 1 1 1 
+Maximum level of Notify concurrency: 1
+Benchmarking TCriticalSection
+Read/write: 15556634/sec
+Number of Subscribe/Unsubscribe calls: 20
+Number of Notify calls: 431
+Notify calls per thread: 38 30 12 6 26 29 6 6 3 4 143 4 36 81 1 1 1 1 2 1 
+Maximum level of Notify concurrency: 1
+Benchmarking TCriticalSection
+Read/write: 15383618/sec
+Number of Subscribe/Unsubscribe calls: 20
+Number of Notify calls: 360
+Notify calls per thread: 12 7 6 24 13 12 2 3 2 160 1 73 6 1 1 33 1 1 1 1 
+Maximum level of Notify concurrency: 1
+Benchmarking TMonitor
+Read/write: 14370260/sec
+Number of Subscribe/Unsubscribe calls: 67
+Number of Notify calls: 236
+Notify calls per thread: 45 32 40 13 12 5 6 7 6 5 5 6 6 6 6 9 6 7 7 7 
+Maximum level of Notify concurrency: 1
+Benchmarking TMonitor
+Read/write: 14393220/sec
+Number of Subscribe/Unsubscribe calls: 63
+Number of Notify calls: 153
+Notify calls per thread: 12 14 10 12 7 10 5 9 6 6 8 8 6 7 7 6 5 5 5 5 
+Maximum level of Notify concurrency: 1
+Benchmarking TMonitor
+Read/write: 14463208/sec
+Number of Subscribe/Unsubscribe calls: 65
+Number of Notify calls: 243
+Notify calls per thread: 28 29 25 16 14 16 6 13 14 7 10 13 9 5 7 6 5 7 7 6 
+Maximum level of Notify concurrency: 1
+Benchmarking TMREWSync
+Read: 610681/sec, write: 321010/sec
+Number of Subscribe/Unsubscribe calls: 86
+Number of Notify calls: 1928
+Notify calls per thread: 104 98 104 103 93 92 107 92 101 93 99 98 94 91 93 92 93 95 92 94 
+Maximum level of Notify concurrency: 20
+Benchmarking TMREWSync
+Read: 613933/sec, write: 323070/sec
+Number of Subscribe/Unsubscribe calls: 81
+Number of Notify calls: 1830
+Notify calls per thread: 108 106 110 89 89 88 87 89 88 89 89 91 88 88 89 87 89 89 88 89 
+Maximum level of Notify concurrency: 20
+Benchmarking TMREWSync
+Read: 611465/sec, write: 319412/sec
+Number of Subscribe/Unsubscribe calls: 84
+Number of Notify calls: 1834
+Notify calls per thread: 106 89 89 106 101 89 88 86 87 98 87 86 92 92 88 92 89 92 89 88 
+Maximum level of Notify concurrency: 20
+Benchmarking TLightweightMREW
+Read: 15840982/sec, write: 15916735/sec
+Number of Subscribe/Unsubscribe calls: 22
+Number of Notify calls: 493
+Notify calls per thread: 35 29 30 27 36 24 32 31 18 36 18 16 17 17 21 15 19 32 18 22 
+Maximum level of Notify concurrency: 13
+Benchmarking TLightweightMREW
+Read: 15621621/sec, write: 15986510/sec
+Number of Subscribe/Unsubscribe calls: 21
+Number of Notify calls: 571
+Notify calls per thread: 32 32 35 35 26 40 27 28 34 21 32 26 27 20 31 15 28 28 21 33 
+Maximum level of Notify concurrency: 14
+Benchmarking TLightweightMREW
+Read: 15841548/sec, write: 16066272/sec
+Number of Subscribe/Unsubscribe calls: 24
+Number of Notify calls: 541
+Notify calls per thread: 71 37 24 24 22 20 22 20 22 26 27 28 24 32 30 24 23 13 28 24 
+Maximum level of Notify concurrency: 15

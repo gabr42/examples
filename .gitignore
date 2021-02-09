@@ -10,3 +10,9 @@ Reader-writer lock/__history/
 *.dsk
 
 Reader-writer lock/Win32/Debug/
+
+Reader-writer lock/Linux64/Debug/
+
+*.deployproj
+
+Reader-writer lock/Win64/Debug/

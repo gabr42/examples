@@ -58,7 +58,7 @@ end;
 
 procedure TLightweightMREWEx.EndWrite;
 begin
-  if {TInterlocked.Read?}FLockOwner <> TThread.Current.ThreadID then
+  if FLockOwner <> TThread.Current.ThreadID then
     raise Exception.Create('Not an owner');
 
   Dec(FLockCount);
